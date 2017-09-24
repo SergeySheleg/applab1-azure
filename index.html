@@ -29,7 +29,7 @@ function drawFaceRects(canvasId, faceApiResponse) {
     var ctx_fillStyle = ctx.fillStyle;
     var ctx_font = ctx.font;
 
-    ctx.font = "20px Arial";
+    ctx.font = "15px Arial";
     ctx.lineWidth = 3;
     
     for (let face of faceApiResponse) {
@@ -47,7 +47,7 @@ function drawFaceRects(canvasId, faceApiResponse) {
         
         var text = "age: " + face.faceAttributes.age;
         var width = ctx.measureText(text).width;
-        var height = 20;
+        var height = 15;
         var x = face.faceRectangle.left;
         var y = face.faceRectangle.top + face.faceRectangle.height;
         ctx.fillRect(x, y, width, height);
