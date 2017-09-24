@@ -87,6 +87,7 @@ function processImage() {
         data: '{"url": ' + '"' + sourceImageUrl + '"}',
     })
     .done(function(data) {
+        document.getElementById('responseTextArea').style.display = "block";
         $("#responseTextArea").val(JSON.stringify(data, null, 2));
         drawFaceRects("myCanvas", data);
         sendTelemetry(prepareTelemetry(data, sourceImageUrl));
@@ -106,7 +107,7 @@ function sendTelemetry(toSend) {
             contentType: 'application/json',
             data: JSON.stringify(data),
         });
-    }  
+    }
 }
 
 function prepareTelemetry(faceApiResponse, imageUrl) {
@@ -135,16 +136,17 @@ Image to analyze: <input type="text" name="inputImage" id="inputImage" value="ht
 <button onclick="processImage()">Analyze face</button>
 <br><br>
 <div id="wrapper" style="width:1020px; display:table;">
-    <div id="jsonOutput" style="width:600px; display:table-cell;">
-        Response:
-        <br><br>
-        <textarea id="responseTextArea" class="UIInput" style="width:580px; height:400px;"></textarea>
-    </div>
+   <!--  <div id="jsonOutput" style="width:600px; display:table-cell;">
+        
+    </div> -->
     <div id="imageDiv" style="width:420px; display:table-cell;">
-        Source image:
-        <br><br>
+        <!-- Source image: -->
+        <!-- <br><br> -->
         <canvas id="myCanvas" width="0" height="0" style="border:0px solid #000000;">
         </canvas> 
+        <!-- Response:
+        <br><br> -->
+        <textarea id="responseTextArea" class="UIInput" style="width:580px; height:400px; display:none;"></textarea>
     </div>
 </div>
 
