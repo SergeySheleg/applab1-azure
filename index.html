@@ -57,15 +57,18 @@ function sendTelemetry(toSend) {
         });
     }  
 }
-
 function prepareTelemetry(faceApiResponse, imageUrl) {
     var preparedTelemetry = [];
     for (var i = 0; i < faceApiResponse.length; i++) {
         preparedTelemetry.push({
-            "faceId" : faceApiResponse[i].faceId,
             "url" : imageUrl,
+            "faceId" : faceApiResponse[i].faceId,
             "gender" : faceApiResponse[i].faceAttributes.gender,
             "age" : faceApiResponse[i].faceAttributes.age,
+            "top": faceApiResponse[i].faceRectangle.top,
+            "left": faceApiResponse[i].faceRectangle.left,
+            "width": faceApiResponse[i].faceRectangle.width,
+            "height": faceApiResponse[i].faceRectangle.height,
         });
     }
     return preparedTelemetry;
