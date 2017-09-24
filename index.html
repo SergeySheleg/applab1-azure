@@ -7,11 +7,65 @@
 <body>
 
 <script type="text/javascript">
-function processImage() {
-     // Display the image.
-    var sourceImageUrl = document.getElementById("inputImage").value;
-    document.querySelector("#sourceImage").src = sourceImageUrl;
+function drawImage(canvasId, imageUrl) {
+    var c = document.getElementById(canvasId);
+    var ctx = c.getContext("2d");
+    
+    var imageObj = new Image();
+    imageObj.onload = function() {
+        c.width = imageObj.width;
+        c.height = imageObj.height;
+        ctx.drawImage(imageObj, 0, 0);
+    }
+    imageObj.src = imageUrl;
+}
 
+function drawFaceRects(canvasId, faceApiResponse) {
+    var c = document.getElementById(canvasId);
+    var ctx = c.getContext("2d");
+    
+    var ctx_lineWidth = ctx.lineWidth;
+    var ctx_strokeStyle = ctx.strokeStyle;
+    var ctx_fillStyle = ctx.fillStyle;
+    var ctx_font = ctx.font;
+
+    ctx.font = "20px Arial";
+    ctx.lineWidth = 3;
+    
+    for (let face of faceApiResponse) {
+        if (face.faceAttributes.gender == "male") {
+            ctx.strokeStyle = "#00BFFF";
+            ctx.fillStyle = "#00BFFF";
+        } else if (face.faceAttributes.gender == "female") {
+            ctx.strokeStyle = "#FF69B4";
+            ctx.fillStyle = "#FF69B4";
+        } else {
+            ctx.strokeStyle = "#000000";
+            ctx.fillStyle = "#000000";
+        }
+        ctx.strokeRect(face.faceRectangle.left, face.faceRectangle.top, face.faceRectangle.width, face.faceRectangle.height);
+        
+        var text = "age: " + face.faceAttributes.age;
+        var width = ctx.measureText(text).width;
+        var height = 20;
+        var x = face.faceRectangle.left;
+        var y = face.faceRectangle.top + face.faceRectangle.height;
+        ctx.fillRect(x, y, width, height);
+
+        ctx.textBaseline = "top";
+        ctx.fillStyle = "#000000";
+        ctx.fillText(text, x, y);
+    }
+
+    ctx.lineWidth = ctx_lineWidth;
+    ctx.strokeStyle = ctx_strokeStyle;
+    ctx.font = ctx_font;
+    ctx.fillStyle = ctx_fillStyle;
+}
+
+function processImage() {
+    var sourceImageUrl = document.getElementById("inputImage").value;
+    drawImage("myCanvas", sourceImageUrl);
 
     var subscriptionKey = "08f5e98f96de46ac8de7ff32ab8af7f7";
     var uriBase = "https://southcentralus.api.cognitive.microsoft.com/face/v1.0/detect";
@@ -22,53 +76,50 @@ function processImage() {
         "returnFaceAttributes": "age,gender,headPose,smile,facialHair,glasses,emotion,hair,makeup,occlusion,accessories,blur,exposure,noise",
     };
 
-    // Perform the REST API call.
-    $.ajax({
+    $.post({
         beforeSend: function(xhrObj){
             xhrObj.setRequestHeader("Content-Type","application/json");
             xhrObj.setRequestHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
         },
-
+        
         url: uriBase + "?" + $.param(params),
-        type: "POST",
         data: '{"url": ' + '"' + sourceImageUrl + '"}',
     })
-
     .done(function(data) {
         $("#responseTextArea").val(JSON.stringify(data, null, 2));
+        drawFaceRects("myCanvas", data);
         sendTelemetry(prepareTelemetry(data, sourceImageUrl));
     })
-
     .fail(function(jqXHR, textStatus, errorThrown) {
         var errorString = (errorThrown === "") ? "Error. " : errorThrown + " (" + jqXHR.status + "): ";
         errorString += (jqXHR.responseText === "") ? "" : (jQuery.parseJSON(jqXHR.responseText).message) ? 
             jQuery.parseJSON(jqXHR.responseText).message : jQuery.parseJSON(jqXHR.responseText).error.message;
         alert(errorString);
     });
-};
+}
 
 function sendTelemetry(toSend) {
-    for (var i = 0; i < toSend.length; i++) {
-        $.ajax({
+    for (let data of toSend) {
+        $.post({
             url: "http://trviad1.azurewebsites.net/tables/img?zumo-api-version=2.0.0",
-            type: "POST",
             contentType: 'application/json',
-            data: JSON.stringify(toSend[i]),
+            data: JSON.stringify(data),
         });
     }  
 }
+
 function prepareTelemetry(faceApiResponse, imageUrl) {
     var preparedTelemetry = [];
-    for (var i = 0; i < faceApiResponse.length; i++) {
+    for (let face of faceApiResponse) {
         preparedTelemetry.push({
             "url" : imageUrl,
-            "faceId" : faceApiResponse[i].faceId,
-            "gender" : faceApiResponse[i].faceAttributes.gender,
-            "age" : faceApiResponse[i].faceAttributes.age,
-            "top": faceApiResponse[i].faceRectangle.top,
-            "left": faceApiResponse[i].faceRectangle.left,
-            "width": faceApiResponse[i].faceRectangle.width,
-            "height": faceApiResponse[i].faceRectangle.height,
+            "faceId" : face.faceId,
+            "gender" : face.faceAttributes.gender,
+            "age" : face.faceAttributes.age,
+            "top": face.faceRectangle.top,
+            "left": face.faceRectangle.left,
+            "width": face.faceRectangle.width,
+            "height": face.faceRectangle.height,
         });
     }
     return preparedTelemetry;
@@ -91,8 +142,12 @@ Image to analyze: <input type="text" name="inputImage" id="inputImage" value="ht
     <div id="imageDiv" style="width:420px; display:table-cell;">
         Source image:
         <br><br>
-        <img id="sourceImage" width="400" />
+        <canvas id="myCanvas" width="0" height="0" style="border:0px solid #000000;">
+        </canvas> 
     </div>
 </div>
+
+ 
+
 </body>
 </html>
