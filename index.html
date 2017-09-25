@@ -102,8 +102,9 @@ function processImage() {
 
 function sendTelemetry(toSend) {
     for (let data of toSend) {
-        $.post({
+        $.ajax({
             url: "http://trviad1.azurewebsites.net/tables/img?zumo-api-version=2.0.0",
+            type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(data),
         });
