@@ -67,8 +67,8 @@ function processImage() {
     var sourceImageUrl = document.getElementById("inputImage").value;
     drawImage("myCanvas", sourceImageUrl);
 
-    var subscriptionKey = "08f5e98f96de46ac8de7ff32ab8af7f7";
-    var uriBase = "https://southcentralus.api.cognitive.microsoft.com/face/v1.0/detect";
+    var subscriptionKey = "c5bb4f0880364322991e7c985ac37023";
+    var uriBase = "https://westeurope.api.cognitive.microsoft.com/face/v1.0/detect";
     
     var params = {
         "returnFaceId": "true",
@@ -103,7 +103,7 @@ function processImage() {
 function sendTelemetry(toSend) {
     for (let data of toSend) {
         $.ajax({
-            url: "http://trviad1.azurewebsites.net/tables/img?zumo-api-version=2.0.0",
+            url: "http://test-fa1.azurewebsites.net/tables/img?zumo-api-version=2.0.0",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(data),
