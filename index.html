@@ -103,7 +103,7 @@ function processImage() {
 function sendTelemetry(toSend) {
     for (let data of toSend) {
         $.ajax({
-            url: "http://test-fa1.azurewebsites.net/tables/img?zumo-api-version=2.0.0",
+            url: "http://test-fa1.azurewebsites.net/tables/lab1?zumo-api-version=2.0.0",
             type: "POST",
             contentType: 'application/json',
             data: JSON.stringify(data),
